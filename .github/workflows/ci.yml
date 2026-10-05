@@ -1,0 +1,28 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - run: npm ci
+      - run: npm run ci
+
+      # the tool must gate a real regression: the fixtures carry one of each kind, and the
+      # job fails if the gate stops seeing them
+      - name: the gate must reject a worse run
+        run: |
+          npm run --silent traceset -- baseline fixtures/baseline.jsonl --out /tmp/baseline.json
+          if npm run --silent traceset -- check fixtures/worse.jsonl --baseline /tmp/baseline.json; then
+            echo "::error::the behaviour regression was not caught"; exit 1
+          fi
+          npm run --silent traceset -- check fixtures/baseline.jsonl --baseline /tmp/baseline.json

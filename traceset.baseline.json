@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "entries": {
+    "flight-agent": {
+      "runId": "flight-agent",
+      "source": "fixtures/baseline.jsonl",
+      "steps": 2,
+      "stopReason": "end_turn",
+      "spentMicroUsd": 10,
+      "inputTokens": 20000,
+      "outputTokens": 10000,
+      "models": [
+        "gpt-4o-mini"
+      ],
+      "tools": [
+        "search_flights"
+      ],
+      "toolCalls": 1,
+      "decisions": [
+        {
+          "step": 0,
+          "kind": "tool",
+          "detail": "search_flights"
+        },
+        {
+          "step": 1,
+          "kind": "message",
+          "detail": "message"
+        }
+      ],
+      "fingerprint": "b91a763c",
+      "answered": true
+    }
+  }
+}

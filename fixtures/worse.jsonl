@@ -1,0 +1,20 @@
+{"type":"run.start","runId":"flight-agent","messages":[{"role":"user","content":"cheapest flight from Naples to Rome?"}],"tools":["search_flights"],"parameters":{"budgetLimit":1000000,"maxSteps":3,"stepAllowance":50000,"price":{"input":150,"output":600}},"seq":0,"ts":1700000000000}
+{"type":"step.start","step":0,"seq":1,"ts":1700000000000}
+{"type":"policy.request","step":0,"model":"gpt-4o-mini","messageCount":1,"seq":2,"ts":1700000000000}
+{"type":"policy.response","step":0,"model":"gpt-4o-mini","usage":{"inputTokens":20,"outputTokens":10},"decision":{"type":"tool","call":{"id":"c1","name":"search_flights","args":{"from":"NAP","to":"FCO"}}},"seq":3,"ts":1700000000000}
+{"type":"budget.settle","step":0,"reserved":50000,"actual":1,"seq":4,"ts":1700000000000}
+{"type":"tool.call","step":0,"call":{"id":"c1","name":"search_flights","args":{"from":"NAP","to":"FCO"}},"sensitive":false,"fingerprint":"29e8e80496d90213","seq":5,"ts":1700000000000}
+{"type":"tool.result","step":0,"callId":"c1","tool":"search_flights","outcome":{"ok":true,"output":[{"airline":"ITA","price":90},{"airline":"Wizz","price":41}]},"seq":6,"ts":1700000000000}
+{"type":"step.start","step":1,"seq":7,"ts":1700000000000}
+{"type":"policy.request","step":1,"model":"gpt-4o-mini","messageCount":3,"seq":8,"ts":1700000000000}
+{"type":"policy.response","step":1,"model":"gpt-4o-mini","usage":{"inputTokens":20,"outputTokens":10},"decision":{"type":"tool","call":{"id":"c2","name":"search_flights","args":{"from":"FCO","to":"NAP"}}},"seq":9,"ts":1700000000000}
+{"type":"budget.settle","step":1,"reserved":50000,"actual":1,"seq":10,"ts":1700000000000}
+{"type":"tool.call","step":1,"call":{"id":"c2","name":"search_flights","args":{"from":"FCO","to":"NAP"}},"sensitive":false,"fingerprint":"29e8e80496d90213","seq":11,"ts":1700000000000}
+{"type":"tool.result","step":1,"callId":"c2","tool":"search_flights","outcome":{"ok":true,"output":[{"airline":"ITA","price":90},{"airline":"Wizz","price":41}]},"seq":12,"ts":1700000000000}
+{"type":"step.start","step":2,"seq":13,"ts":1700000000000}
+{"type":"policy.request","step":2,"model":"gpt-4o-mini","messageCount":5,"seq":14,"ts":1700000000000}
+{"type":"policy.response","step":2,"model":"gpt-4o-mini","usage":{"inputTokens":20,"outputTokens":10},"decision":{"type":"tool","call":{"id":"c3","name":"search_flights","args":{"from":"NAP","to":"MXP"}}},"seq":15,"ts":1700000000000}
+{"type":"budget.settle","step":2,"reserved":50000,"actual":1,"seq":16,"ts":1700000000000}
+{"type":"tool.call","step":2,"call":{"id":"c3","name":"search_flights","args":{"from":"NAP","to":"MXP"}},"sensitive":false,"fingerprint":"29e8e80496d90213","seq":17,"ts":1700000000000}
+{"type":"tool.result","step":2,"callId":"c3","tool":"search_flights","outcome":{"ok":true,"output":[{"airline":"ITA","price":90},{"airline":"Wizz","price":41}]},"seq":18,"ts":1700000000000}
+{"type":"run.end","steps":3,"stopReason":"max_steps","spent":3,"spentUsd":"0.000003","seq":19,"ts":1700000000000}

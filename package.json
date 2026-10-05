@@ -1,0 +1,31 @@
+{
+  "name": "@paovalle/traceset",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Turn agent traces into regression tests: did my change make the agent worse, or just more expensive?",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "ci": "npm run typecheck && npm run lint && npm run test",
+    "traceset": "tsx src/cli.ts"
+  },
+  "bin": {
+    "traceset": "./src/cli.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "eslint": "^9.17.0",
+    "typescript-eslint": "^8.19.0",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0"
+  }
+}

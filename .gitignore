@@ -1,0 +1,15 @@
+# Only ignores what is noise for this project.
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/*
+*.swp
+*~
+
+# --- artifacts ---
+node_modules/
+dist/
+coverage/
+*.log
+# the baseline is an input, not an artifact: it is committed on purpose
