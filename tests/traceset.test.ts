@@ -166,6 +166,28 @@ describe('the CLI', () => {
     expect(parsed.findings.map((f) => f.kind)).toContain('cost_increase');
   });
 
+  it('--update-baseline accepts a change on purpose and keeps the other scenarios', () => {
+    const baselinePath = join(workspace, 'updatable.json');
+    run(['baseline', fixture('baseline'), '--out', baselinePath]);
+
+    // first, the regression is refused
+    expect(run(['check', fixture('worse'), '--baseline', baselinePath]).code).toBe(1);
+
+    // then it is accepted, deliberately
+    const accepted = run(['check', fixture('worse'), '--baseline', baselinePath, '--update-baseline']);
+    expect(accepted.code).toBe(0);
+    expect(accepted.lines.join('\n')).toMatch(/updated .*1 run\(s\) accepted/);
+    // the findings are printed even when the change is accepted
+    expect(accepted.lines.join('\n')).toContain('REGRESSION');
+
+    // the accepted run is now the baseline, and the same check is quiet
+    const stored = JSON.parse(readFileSync(baselinePath, 'utf8')) as { entries: Record<string, { stopReason: string }> };
+    expect(stored.entries['flight-agent']?.stopReason).toBe('max_steps');
+    const after = run(['check', fixture('worse'), '--baseline', baselinePath]);
+    expect(after.code).toBe(0);
+    expect(after.lines.join('\n')).toContain('no change');
+  });
+
   it('--require-baseline turns "never seen" into a failure, for a gate in CI', () => {
     const baselinePath = join(workspace, 'partial.json');
     // a baseline that knows a different scenario, so this run is genuinely unseen
