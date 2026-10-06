@@ -110,6 +110,7 @@ regression tests at all.
 | `--max-token-delta` | `0.5` | tolerated relative token increase |
 | `--max-step-delta` | `0` | tolerated extra steps |
 | `--require-baseline` | off | a run with no baseline fails |
+| `--update-baseline` | off | write these runs into the baseline: accepting a change on purpose, with the findings still printed |
 | `--json` | off | machine-readable findings, same verdict |
 
 ## Scope, declared

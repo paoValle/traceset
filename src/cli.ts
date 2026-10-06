@@ -43,7 +43,7 @@ const USAGE = [
   '  traceset baseline <trace.jsonl...> [--out traceset.baseline.json]',
   '  traceset check    <trace.jsonl...> [--baseline traceset.baseline.json] [--json]',
   '                    [--max-cost-delta 0.2] [--max-token-delta 0.5] [--max-step-delta 0]',
-  '                    [--require-baseline]',
+  '                    [--require-baseline] [--update-baseline]',
   '',
   'Behaviour is compared separately from price: a run that is cheaper and worse fails.',
 ].join('\n');
@@ -110,6 +110,7 @@ export function run(argv: readonly string[]): Outcome {
         'max-step-delta': { type: 'string' },
         json: { type: 'boolean' },
         'require-baseline': { type: 'boolean' },
+        'update-baseline': { type: 'boolean' },
         help: { type: 'boolean', short: 'h' },
       },
     });
@@ -173,14 +174,34 @@ export function run(argv: readonly string[]): Outcome {
       : finding,
   );
 
+  const regressions = hasRegressions(findings);
+
+  // Accepting a change on purpose: the runs become the baseline, and the findings are printed anyway,
+  // because "I accept this" is a decision somebody should be able to see afterwards. Without this the
+  // only way to accept a regression is to delete the baseline file and rebuild it, which throws away
+  // the scenarios that were not in this run.
+  if (values['update-baseline'] === true) {
+    const merged = baselineOf([...Object.values(baseline.entries), ...summaries]);
+    writeFileSync(path, `${jsonOf(merged)}\n`);
+    const accepted = regressions ? ' (including changes it would have refused)' : '';
+    return {
+      code: 0,
+      lines: [
+        `traceset check — ${summaries.length} trace(s) against ${path}`,
+        render(findings),
+        `updated ${path}: ${summaries.length} run(s) accepted${accepted}`,
+      ],
+    };
+  }
+
   if (values['json'] === true) {
     return {
-      code: hasRegressions(findings) ? 1 : 0,
-      lines: [jsonOf({ baseline: path, traces: summaries.length, regressions: hasRegressions(findings), findings })],
+      code: regressions ? 1 : 0,
+      lines: [jsonOf({ baseline: path, traces: summaries.length, regressions, findings })],
     };
   }
   return {
-    code: hasRegressions(findings) ? 1 : 0,
+    code: regressions ? 1 : 0,
     lines: [`traceset check — ${summaries.length} trace(s) against ${path}`, render(findings)],
   };
 }
