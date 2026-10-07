@@ -5,6 +5,12 @@ versioning [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- A behaviour change is named, not only detected: next to the first divergence the report says which
+  kind of change it is — `reordered`, `extra step`, `missing step`, `different tool`, `different stop
+  reason` — because a reordered pair of calls, an added step and a swapped tool all used to read as
+  "a hash moved". The fingerprint stays the sentinel; the classification is what a person reads.
+
 ## [0.1.0] - 2026-10-05
 
 First version: agent traces as regression tests, with behaviour and price judged separately.

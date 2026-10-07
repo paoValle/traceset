@@ -11,7 +11,72 @@
 //! worse**. A gate that only looks at money passes it. Here it fails, because behaviour is
 //! compared separately and cannot be averaged away by a lower bill.
 
-import { firstDivergence, type Summary } from './trace.js';
+import { firstDivergence, type DecisionSignature, type Summary } from './trace.js';
+
+/**
+ * Names the shape of a behaviour change, because the fingerprint can only say that there is one.
+ *
+ * A reordered pair of calls, an added step and a swapped tool all read as "a hash moved", and a
+ * person looking at a gate needs to know which of them they are looking at.
+ */
+export type BehaviourDelta =
+  | 'same'
+  | 'reordered'
+  | 'extra step'
+  | 'missing step'
+  | 'different tool'
+  | 'different stop reason'
+  | 'different decision';
+
+const sameDecision = (a: DecisionSignature, b: DecisionSignature): boolean =>
+  a.kind === b.kind && a.detail === b.detail;
+
+/** Whether one sequence appears inside the other, in order, ignoring the step numbers. */
+function isSubsequence(part: readonly DecisionSignature[], whole: readonly DecisionSignature[]): boolean {
+  let index = 0;
+  for (const decision of whole) {
+    const wanted = part[index];
+    if (wanted !== undefined && sameDecision(decision, wanted)) index++;
+  }
+  return index === part.length;
+}
+
+/** Whether two sequences are the same decisions in a different order. */
+function isReorderOf(a: readonly DecisionSignature[], b: readonly DecisionSignature[]): boolean {
+  if (a.length !== b.length) return false;
+  const shape = (decisions: readonly DecisionSignature[]): string =>
+    decisions
+      .map((decision) => `${decision.kind}:${decision.detail}`)
+      .sort()
+      .join('|');
+  return shape(a) === shape(b);
+}
+
+/**
+ * Says how two decision sequences differ, once one knows that they do.
+ *
+ * The checks are ordered by how much they explain: a sequence that is the same decisions in another
+ * order is `reordered` even when it also looks like an extra step, and a step count that changed
+ * with nothing else moving is a step added or dropped rather than a different decision. When none of
+ * those describe it, the first divergence does: two stops with different reasons are a stop reason
+ * change, a tool on either side is a tool change, and the rest is reported as what it is, a
+ * different decision.
+ */
+export function classifyBehaviour(
+  before: readonly DecisionSignature[],
+  after: readonly DecisionSignature[],
+): BehaviourDelta {
+  const divergence = firstDivergence(before, after);
+  if (divergence === -1) return 'same';
+  if (isReorderOf(before, after)) return 'reordered';
+  if (isSubsequence(before, after)) return 'extra step';
+  if (isSubsequence(after, before)) return 'missing step';
+  const left = before[divergence];
+  const right = after[divergence];
+  if (left?.kind === 'stop' && right?.kind === 'stop') return 'different stop reason';
+  if (left?.kind === 'tool' || right?.kind === 'tool') return 'different tool';
+  return 'different decision';
+}
 
 /** How much change is tolerated before it counts. */
 export interface Thresholds {
@@ -104,7 +169,8 @@ export function compare(baseline: Summary, current: Summary, thresholds: Thresho
     at(
       'behaviour_changed',
       'regression',
-      `behaviour changed at step ${divergence}: ${describe(before)} → ${describe(after)}`,
+      `behaviour changed at step ${divergence} (${classifyBehaviour(baseline.decisions, current.decisions)}): ` +
+        `${describe(before)} → ${describe(after)}`,
     );
   }
   if (baseline.stopReason !== current.stopReason) {
