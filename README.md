@@ -33,7 +33,7 @@ $ npm run traceset -- check fixtures/pricier.jsonl fixtures/worse.jsonl   # exit
 traceset check — 2 trace(s) against traceset.baseline.json
   flight-agent         cost +80.0% (18 µUSD vs 10)                                 REGRESSION
   flight-agent         tokens +100.0% (60000 vs 30000)                             REGRESSION
-  flight-agent         behaviour changed at step 1: message → tool:search_flights   REGRESSION
+  flight-agent         behaviour changed at step 1 (different tool): message → tool:search_flights REGRESSION
   flight-agent         stop reason end_turn → max_steps                            REGRESSION
   flight-agent         the baseline ended with an answer, this run did not          REGRESSION
   flight-agent         steps 2 → 3                                                 REGRESSION

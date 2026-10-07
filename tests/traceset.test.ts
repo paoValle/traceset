@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   hasRegressions,
   baselineOf,
+  classifyBehaviour,
   compare,
   compareAll,
   parseBaseline,
@@ -65,6 +66,34 @@ describe('behaviour is not price', () => {
     expect(firstDivergence(baseline.decisions, worse.decisions)).toBe(1);
     expect(worse.stopReason).toBe('max_steps');
     expect(worse.answered).toBe(false);
+  });
+});
+
+describe('naming the behaviour change', () => {
+  const decision = (step: number, kind: 'tool' | 'message' | 'stop', detail: string) => ({ step, kind, detail });
+
+  it('says what kind of change it is, not only that the hash moved', () => {
+    const tool = decision(0, 'tool', 'search_flights');
+    const other = decision(0, 'tool', 'book_flight');
+    const answer = decision(1, 'message', 'message');
+
+    expect(classifyBehaviour([tool, answer], [tool, answer])).toBe('same');
+    expect(classifyBehaviour([tool, answer], [answer, tool])).toBe('reordered');
+    expect(classifyBehaviour([tool], [tool, answer])).toBe('extra step');
+    expect(classifyBehaviour([tool, answer], [tool])).toBe('missing step');
+    expect(classifyBehaviour([tool, answer], [other, answer])).toBe('different tool');
+    expect(classifyBehaviour([tool, answer], [tool, other])).toBe('different tool');
+    expect(classifyBehaviour([tool, answer], [decision(1, 'message', 'message'), tool])).toBe('reordered');
+    expect(
+      classifyBehaviour([tool, decision(1, 'stop', 'end_turn')], [tool, decision(1, 'stop', 'max_steps')]),
+    ).toBe('different stop reason');
+    expect(classifyBehaviour([answer], [decision(0, 'stop', 'end_turn')])).toBe('different decision');
+  });
+
+  it('names it next to the first divergence, in the finding a person reads', () => {
+    const findings = compare(baseline, worse);
+    const behaviour = findings.find((f) => f.kind === 'behaviour_changed');
+    expect(behaviour?.message).toContain('behaviour changed at step 1 (different tool): message → tool:search_flights');
   });
 });
 
