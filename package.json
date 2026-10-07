@@ -1,6 +1,6 @@
 {
   "name": "@paovalle/traceset",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Turn agent traces into regression tests: did my change make the agent worse, or just more expensive?",
   "license": "MIT",
