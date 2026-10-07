@@ -5,6 +5,8 @@ versioning [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-07
+
 ### Added
 - A behaviour change is named, not only detected: next to the first divergence the report says which
   kind of change it is — `reordered`, `extra step`, `missing step`, `different tool`, `different stop
